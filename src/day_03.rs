@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-const INPUT: &str = include_str!("../input/day_03.txt");
-
 fn get_priority(item: &char) -> usize {
     let map = {
         let mut lower: HashMap<char, usize> = ('a'..='z')
@@ -21,10 +19,10 @@ fn get_priority(item: &char) -> usize {
 }
 
 pub fn answer() {
-    let lines: Vec<&str> = INPUT.lines().collect();
+    let lines: Vec<&str> = include_str!("../input/day_03.txt").lines().collect();
 
     println!(
-        "Part 1: {:?}",
+        "Answer 01: {:?}",
         lines
             .iter()
             .map(|r| {
@@ -40,7 +38,7 @@ pub fn answer() {
     );
 
     println!(
-        "Part 2: {:?}",
+        "Answer 02: {:?}",
         lines
             .chunks(3)
             .map(|chunk| {
@@ -49,7 +47,7 @@ pub fn answer() {
                         return get_priority(&c);
                     }
                 }
-                panic!("Couldn't find comon item.");
+                panic!("Couldn't find common item.");
             })
             .sum::<usize>()
     )
