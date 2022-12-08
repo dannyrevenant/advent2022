@@ -8,9 +8,9 @@ mod day_05;
 mod day_06;
 mod day_07;
 mod day_08;
+mod day_09;
 
 fn main() -> Result<(), Box<dyn Error>> {
-
     let time = Instant::now();
     day_01::answer();
     day_02::answer();
@@ -20,6 +20,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     day_06::answer()?;
     day_07::answer()?;
     day_08::answer()?;
+    day_09::answer()?;
 
     println!("Time elapsed: {:?}", time.elapsed());
 

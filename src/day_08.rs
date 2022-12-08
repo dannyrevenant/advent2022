@@ -74,27 +74,27 @@ fn get_results(contents: &str) -> Result<(usize, usize), Box<dyn std::error::Err
                     }
 
                     //left
-                    let left = line[0..char_pos]
+                    let left = &line[0..char_pos]
                         .iter()
                         .rev()
                         .take_while(|c| c < &char)
                         .count();
 
                     //right
-                    let right = line[char_pos + 1..]
+                    let right = &line[char_pos + 1..]
                         .iter()
                         .take_while(|c| c < &char)
                         .count();
 
                     //up
-                    let up = map[0..line_pos]
+                    let up = &map[0..line_pos]
                         .iter()
                         .rev()
                         .take_while(|line_to_parse| line_to_parse[char_pos] < *char)
                         .count();
 
                     //down
-                    let down = map[line_pos + 1..]
+                    let down = &map[line_pos + 1..]
                         .iter()
                         .take_while(|line_to_parse| line_to_parse[char_pos] < *char)
                         .count();
