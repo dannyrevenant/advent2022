@@ -2,9 +2,7 @@ use std::collections::BTreeMap;
 use std::convert::TryFrom;
 use std::error::Error;
 
-struct Map {
-    structure: BTreeMap<usize, Vec<char>>,
-}
+struct Map(BTreeMap<usize, Vec<char>>);
 
 impl TryFrom<&str> for Map {
     type Error = &'static str;
@@ -27,14 +25,12 @@ impl TryFrom<&str> for Map {
                 });
         });
 
-        Ok(Map {
-            structure: map,
-        })
+        Ok(Map(map))
     }
 }
 
 struct Move {
-    quantiry: usize,
+    quantity: usize,
     from: usize,
     to: usize,
 }
@@ -51,7 +47,7 @@ impl TryFrom<&str> for Move {
             .collect();
 
         Ok(Move {
-            quantiry: data[0],
+            quantity: data[0],
             from: data[1],
             to: data[2],
         })
@@ -59,7 +55,7 @@ impl TryFrom<&str> for Move {
 }
 
 fn get_answer(mut map: Map) -> String {
-    map.structure
+    map.0
         .iter_mut()
         .flat_map(|(_, column)| column.pop())
         .collect()
@@ -75,15 +71,15 @@ pub fn answer() -> Result<(), Box<dyn Error>> {
     for row in plan.trim().lines() {
         let the_move = Move::try_from(row)?;
 
-        let len = map.structure.get(&the_move.from).ok_or("Could not get map structure")?.len();
+        let len = map.0.get(&the_move.from).ok_or("Could not get map structure")?.len();
 
-        map.structure
+        map.0
             .get_mut(&the_move.from)
             .ok_or("Could not get map structure")?
-            .split_off(len - the_move.quantiry)
+            .split_off(len - the_move.quantity)
             .iter()
             .rev()
-            .try_for_each(|item| match map.structure.get_mut(&the_move.to) {
+            .try_for_each(|item| match map.0.get_mut(&the_move.to) {
                 Some(map) => Ok(map.push(*item)),
                 None => Err("Could not get map structure"),
             })?;
@@ -96,14 +92,14 @@ pub fn answer() -> Result<(), Box<dyn Error>> {
     for row in plan.trim().lines() {
         let the_move = Move::try_from(row)?;
 
-        let len = map2.structure.get(&the_move.from).ok_or("Could not get map structure")?.len();
+        let len = map2.0.get(&the_move.from).ok_or("Could not get map structure")?.len();
 
-        map2.structure
+        map2.0
             .get_mut(&the_move.from)
             .ok_or("Could not get map structure")?
-            .split_off(len - the_move.quantiry)
+            .split_off(len - the_move.quantity)
             .iter()
-            .try_for_each(|item| match map2.structure.get_mut(&the_move.to) {
+            .try_for_each(|item| match map2.0.get_mut(&the_move.to) {
                 Some(map) => Ok(map.push(*item)),
                 None => Err("Gutted"),
             })?;

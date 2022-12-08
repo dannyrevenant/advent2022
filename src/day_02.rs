@@ -1,3 +1,5 @@
+use std::convert::TryFrom;
+
 #[repr(u16)]
 enum RoundScore {
     Lose = 0,
@@ -5,13 +7,15 @@ enum RoundScore {
     Win = 6,
 }
 
-impl RoundScore {
-    fn from(intention: &str) -> Self {
+impl TryFrom<&str> for RoundScore {
+    type Error = &'static str;
+
+    fn try_from(intention: &str) -> Result<Self, Self::Error> {
         match intention {
-            "X" => RoundScore::Lose,
-            "Y" => RoundScore::Draw,
-            "Z" => RoundScore::Win,
-            _ => panic!("Unknown intention: {}", intention),
+            "X" => Ok(RoundScore::Lose),
+            "Y" => Ok(RoundScore::Draw),
+            "Z" => Ok(RoundScore::Win),
+            _ => Err("Unknown intention".into()),
         }
     }
 }
@@ -24,16 +28,20 @@ enum Shape {
     Scissors = 3,
 }
 
-impl Shape {
-    fn from(shape: &str) -> Self {
+impl TryFrom<&str> for Shape {
+    type Error = &'static str;
+
+    fn try_from(shape: &str) -> Result<Self, Self::Error> {
         match shape {
-            "A" | "X" => Shape::Stone,
-            "B" | "Y" => Shape::Paper,
-            "C" | "Z" => Shape::Scissors,
-            _ => panic!("Unknown shape: {}", shape),
+            "A" | "X" => Ok(Shape::Stone),
+            "B" | "Y" => Ok(Shape::Paper),
+            "C" | "Z" => Ok(Shape::Scissors),
+            _ => Err("Unknown shape".into()),
         }
     }
+}
 
+impl Shape {
     fn wins_against(self) -> Shape {
         match self {
             Shape::Stone => Shape::Scissors,
@@ -60,12 +68,12 @@ pub fn answer() {
         .clone()
         .fold(0, |acc, line| match line.split_once(" ") {
             Some((theirs, mine)) => acc
-                + Shape::from(mine) as u16
+                + Shape::try_from(mine).unwrap() as u16
                 + match (mine, theirs) {
-                    _ if Shape::from(mine).wins_against() == Shape::from(theirs) => RoundScore::Win,
-                    _ if Shape::from(mine).loses_to() == Shape::from(theirs) => RoundScore::Lose,
-                    _ => RoundScore::Draw,
-                } as u16,
+                    _ if Shape::try_from(mine).unwrap().wins_against() == Shape::try_from(theirs).unwrap() => RoundScore::Win as u16,
+                    _ if Shape::try_from(mine).unwrap().loses_to() == Shape::try_from(theirs).unwrap() => RoundScore::Lose as u16,
+                    _ => RoundScore::Draw as u16,
+                },
             None => acc,
         });
 
@@ -75,12 +83,12 @@ pub fn answer() {
         .clone()
         .fold(0, |acc, line| match line.split_once(" ") {
             Some((theirs, intention)) => acc
-                + RoundScore::from(intention) as u16
-                + match RoundScore::from(intention) {
-                    RoundScore::Lose => Shape::from(theirs).wins_against(),
-                    RoundScore::Draw => Shape::from(theirs),
-                    RoundScore::Win => Shape::from(theirs).loses_to(),
-                } as u16,
+                + RoundScore::try_from(intention).unwrap() as u16
+                + match RoundScore::try_from(intention).unwrap() {
+                    RoundScore::Lose => Shape::try_from(theirs).unwrap().wins_against() as u16,
+                    RoundScore::Draw => Shape::try_from(theirs).unwrap() as u16,
+                    RoundScore::Win => Shape::try_from(theirs).unwrap().loses_to() as u16,
+                },
             None => acc,
         });
 
