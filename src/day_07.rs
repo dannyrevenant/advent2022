@@ -2,8 +2,8 @@ pub fn answer() -> Result<(), Box<dyn std::error::Error>> {
     let sizes = walk(&mut include_str!("../input/day_07.txt").lines());
     let required = 30000000 - (70000000 - sizes.last().unwrap());
 
-    println!("Answer 1: {}", sizes.iter().filter(|&&size| size <= 100000).sum::<usize>());
-    println!("Answer 2: {}", sizes.iter().filter(|&&size| size >= required).min().unwrap());
+    println!("Answer 01: {}", sizes.iter().filter(|&&size| size <= 100000).sum::<usize>());
+    println!("Answer 02: {}", sizes.iter().filter(|&&size| size >= required).min().unwrap());
 
     Ok(())
 }
