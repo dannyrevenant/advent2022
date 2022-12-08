@@ -1,165 +1,113 @@
 fn get_map(contents: &str) -> Vec<Vec<u32>> {
-    let mut result = vec![];
-    for line in contents.lines() {
-        let mut row: Vec<u32> = vec![];
-        for char in line.chars() {
-            row.push(char.to_digit(10).unwrap());
-        }
-        result.push(row);
-    }
-    result
+    contents
+        .lines()
+        .map(|line| {
+            line.chars()
+                .map(|char| char.to_digit(10).unwrap())
+                .collect()
+        })
+        .collect()
 }
 
-fn get_results(contents: &str) -> Result<(i32, i32), Box<dyn std::error::Error>> {
-    let mut visible = 0;
-
+fn get_results(contents: &str) -> Result<(usize, usize), Box<dyn std::error::Error>> {
     let map = get_map(contents);
 
-    for (index_line, line) in map.iter().enumerate() {
-        let len = line.len();
-
-        if index_line == 0 || index_line == len - 1 {
-            visible += len;
-            continue;
-        }
-
-        'outer: for (index_row, char) in line.iter().enumerate() {
-            if index_row == 0 || index_row == len - 1 {
-                visible += 1;
-                continue;
+    let visible = map
+        .iter()
+        .enumerate()
+        .map(|(line_pos, line)| {
+            let len = line.len();
+            if line_pos == 0 || line_pos == len - 1 {
+                return len;
             }
 
-            for (i, c) in line.iter().enumerate() {
-                if i == index_row {
-                    visible += 1;
-                    continue 'outer;
-                }
-                if c >= char {
-                    break;
-                }
+            line.iter()
+                .enumerate()
+                .filter(|(char_pos, char)| {
+                    if *char_pos == 0 || *char_pos == len - 1 {
+                        return true;
+                    }
+
+                    if line[0..*char_pos].iter().all(|item| item < char) {
+                        return true;
+                    }
+
+                    if line[char_pos + 1..].iter().all(|item| item < char) {
+                        return true;
+                    }
+
+                    if map[0..line_pos]
+                        .iter()
+                        .all(|line_to_parse| &line_to_parse[*char_pos] < char)
+                    {
+                        return true;
+                    }
+
+                    if map[line_pos + 1..]
+                        .iter()
+                        .all(|line_to_parse| &line_to_parse[*char_pos] < char)
+                    {
+                        return true;
+                    }
+
+                    return false;
+                })
+                .count()
+        })
+        .sum();
+
+    let max_score = map
+        .iter()
+        .enumerate()
+        .map(|(line_pos, line)| {
+            let len = line.len();
+            if line_pos == 0 || line_pos == len - 1 {
+                return 0;
             }
 
-            for (i, c) in line.iter().enumerate() {
-                if i <= index_row {
-                    continue;
-                }
+            return line
+                .iter()
+                .enumerate()
+                .map(|(char_pos, char)| {
+                    if char_pos == 0 || char_pos == len - 1 {
+                        return 0;
+                    }
 
-                if c >= char {
-                    break;
-                }
+                    //left
+                    let left = line[0..char_pos]
+                        .iter()
+                        .rev()
+                        .take_while(|c| c < &char)
+                        .count();
 
-                if i == len - 1 {
-                    visible += 1;
-                    continue 'outer;
-                }
-            }
+                    //right
+                    let right = line[char_pos + 1..]
+                        .iter()
+                        .take_while(|c| c < &char)
+                        .count();
 
-            for (i, line_to_parse) in map.iter().enumerate() {
-                if i == index_line {
-                    visible += 1;
-                    continue 'outer;
-                }
+                    //up
+                    let up = map[0..line_pos]
+                        .iter()
+                        .rev()
+                        .take_while(|line_to_parse| line_to_parse[char_pos] < *char)
+                        .count();
 
-                if &line_to_parse[index_row] >= char {
-                    break;
-                }
-            }
+                    //down
+                    let down = map[line_pos + 1..]
+                        .iter()
+                        .take_while(|line_to_parse| line_to_parse[char_pos] < *char)
+                        .count();
 
-            for (i, line_to_parse) in map.iter().enumerate() {
-                if i <= index_line {
-                    continue;
-                }
+                    return left * right * up * (down + 1);
+                })
+                .max()
+                .unwrap();
+        })
+        .max()
+        .unwrap();
 
-                if &line_to_parse[index_row] >= char {
-                    break;
-                }
-
-                if i == map.len() - 1 {
-                    visible += 1;
-                    continue 'outer;
-                }
-            }
-        }
-    }
-
-    let mut max_score = 0;
-
-    for (index_line, line) in map.iter().enumerate() {
-        if index_line == 0 || index_line == map.len() - 1 {
-            continue;
-        }
-
-        let len = line.len();
-        for (index_row, char) in line.iter().enumerate() {
-            if index_row == 0 || index_row == len - 1 {
-                continue;
-            }
-
-            //left
-            let mut left = 0;
-            for (i, c) in line.iter().enumerate() {
-                if i == index_row {
-                    break;
-                }
-
-                left += 1;
-
-                if c >= char {
-                    left = 0;
-                }
-            }
-
-            //right
-            let mut right = 0;
-            for (i, c) in line.iter().enumerate() {
-                if i <= index_row {
-                    continue;
-                }
-
-                right += 1;
-
-                if c >= char {
-                    break;
-                }
-            }
-
-            //up
-            let mut up = 0;
-            for (i, line_to_parse) in map.iter().enumerate() {
-                if i == index_line {
-                    break;
-                }
-
-                up += 1;
-
-                if &line_to_parse[index_row] >= char {
-                    up = 0;
-                }
-            }
-
-            //down
-            let mut down = 0;
-            for (i, line_to_parse) in map.iter().enumerate() {
-                if i <= index_line {
-                    continue;
-                }
-
-                down += 1;
-
-                if &line_to_parse[index_row] >= char {
-                    break;
-                }
-            }
-
-            let score = left * right * up * down;
-
-            if score > max_score {
-                max_score = score;
-            }
-        }
-    }
-
-    Ok((visible.try_into().unwrap(), max_score))
+    Ok((visible, max_score))
 }
 
 pub fn answer() -> Result<(), Box<dyn std::error::Error>> {
@@ -177,6 +125,11 @@ pub fn answer() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 fn test_answer() {
     let input = include_str!("../input/day_08.txt");
+    //     let input = "30373
+    // 25512
+    // 65332
+    // 33549
+    // 35390";
 
     let expected_output = (1823, 211680);
 
