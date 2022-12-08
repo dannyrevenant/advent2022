@@ -1,4 +1,4 @@
-use std::error::Error;
+use std::{error::Error, time::Instant};
 
 mod day_01;
 mod day_02;
@@ -10,6 +10,8 @@ mod day_07;
 mod day_08;
 
 fn main() -> Result<(), Box<dyn Error>> {
+
+    let time = Instant::now();
     day_01::answer();
     day_02::answer();
     day_03::answer();
@@ -18,6 +20,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     day_06::answer()?;
     day_07::answer()?;
     day_08::answer()?;
+
+    println!("Time elapsed: {:?}", time.elapsed());
 
     Ok(())
 }
