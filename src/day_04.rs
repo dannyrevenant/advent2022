@@ -9,20 +9,14 @@ pub fn answer() {
 
     let fully_contained_count: i32 = section_range_pairs
         .iter()
-        .map(|pair| {
-            if is_contained(pair.0, pair.1) || is_contained(pair.1, pair.0) {
-                1
-            } else {
-                0
-            }
-        })
+        .map(|pair| i32::from(is_contained(pair.0, pair.1) || is_contained(pair.1, pair.0)))
         .sum();
 
     println!("Answer 01: {}", fully_contained_count);
 
     let overlapping_count: i32 = section_range_pairs
         .iter()
-        .map(|pair| if is_overlapping(pair.0, pair.1) { 1 } else { 0 })
+        .map(|pair| i32::from(is_overlapping(pair.0, pair.1)))
         .sum();
 
     println!("Answer 02: {}", overlapping_count);

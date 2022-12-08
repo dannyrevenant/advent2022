@@ -1,8 +1,9 @@
-use std::error::Error;
 use std::collections::HashSet;
+use std::error::Error;
 
 fn find_start(content: &str, size: usize) -> Result<usize, Box<dyn Error>> {
-    let result = content.chars()
+    let result = content
+        .chars()
         .collect::<Vec<char>>()
         .windows(size)
         .map(|window| -> HashSet<char> { HashSet::from_iter(window.to_vec()) })
@@ -10,7 +11,7 @@ fn find_start(content: &str, size: usize) -> Result<usize, Box<dyn Error>> {
 
     match result {
         Some(result) => Ok(result + size),
-        _ => Err("Not found".into())
+        _ => Err("Not found".into()),
     }
 }
 

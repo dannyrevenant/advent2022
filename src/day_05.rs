@@ -18,7 +18,10 @@ impl TryFrom<&str> for Map {
             .collect();
 
         lines.for_each(|row| {
-            row.chars().skip(1).step_by(4).enumerate()
+            row.chars()
+                .skip(1)
+                .step_by(4)
+                .enumerate()
                 .filter(|(_, char)| ![' ', '[', ']'].contains(char))
                 .for_each(|(index, char)| {
                     map.get_mut(&(index + 1)).unwrap().push(char);
@@ -71,7 +74,11 @@ pub fn answer() -> Result<(), Box<dyn Error>> {
     for row in plan.trim().lines() {
         let the_move = Move::try_from(row)?;
 
-        let len = map.0.get(&the_move.from).ok_or("Could not get map structure")?.len();
+        let len = map
+            .0
+            .get(&the_move.from)
+            .ok_or("Could not get map structure")?
+            .len();
 
         map.0
             .get_mut(&the_move.from)
@@ -80,7 +87,10 @@ pub fn answer() -> Result<(), Box<dyn Error>> {
             .iter()
             .rev()
             .try_for_each(|item| match map.0.get_mut(&the_move.to) {
-                Some(map) => Ok(map.push(*item)),
+                Some(map) => {
+                    map.push(*item);
+                    Ok(())
+                }
                 None => Err("Could not get map structure"),
             })?;
     }
@@ -92,7 +102,11 @@ pub fn answer() -> Result<(), Box<dyn Error>> {
     for row in plan.trim().lines() {
         let the_move = Move::try_from(row)?;
 
-        let len = map2.0.get(&the_move.from).ok_or("Could not get map structure")?.len();
+        let len = map2
+            .0
+            .get(&the_move.from)
+            .ok_or("Could not get map structure")?
+            .len();
 
         map2.0
             .get_mut(&the_move.from)
@@ -100,7 +114,10 @@ pub fn answer() -> Result<(), Box<dyn Error>> {
             .split_off(len - the_move.quantity)
             .iter()
             .try_for_each(|item| match map2.0.get_mut(&the_move.to) {
-                Some(map) => Ok(map.push(*item)),
+                Some(map) => {
+                    map.push(*item);
+                    Ok(())
+                }
                 None => Err("Gutted"),
             })?;
     }

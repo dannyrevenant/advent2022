@@ -15,7 +15,7 @@ impl TryFrom<&str> for RoundScore {
             "X" => Ok(RoundScore::Lose),
             "Y" => Ok(RoundScore::Draw),
             "Z" => Ok(RoundScore::Win),
-            _ => Err("Unknown intention".into()),
+            _ => Err("Unknown intention"),
         }
     }
 }
@@ -36,7 +36,7 @@ impl TryFrom<&str> for Shape {
             "A" | "X" => Ok(Shape::Stone),
             "B" | "Y" => Ok(Shape::Paper),
             "C" | "Z" => Ok(Shape::Scissors),
-            _ => Err("Unknown shape".into()),
+            _ => Err("Unknown shape"),
         }
     }
 }
@@ -62,18 +62,27 @@ impl Shape {
 pub fn answer() {
     let contents = include_str!("../input/day_02.txt");
 
-    let rounds = contents.split("\n");
+    let rounds = contents.split('\n');
 
     let total1 = rounds
         .clone()
-        .fold(0, |acc, line| match line.split_once(" ") {
-            Some((theirs, mine)) => acc
-                + Shape::try_from(mine).unwrap() as u16
-                + match (mine, theirs) {
-                    _ if Shape::try_from(mine).unwrap().wins_against() == Shape::try_from(theirs).unwrap() => RoundScore::Win as u16,
-                    _ if Shape::try_from(mine).unwrap().loses_to() == Shape::try_from(theirs).unwrap() => RoundScore::Lose as u16,
-                    _ => RoundScore::Draw as u16,
-                },
+        .fold(0, |acc, line| match line.split_once(' ') {
+            Some((theirs, mine)) => {
+                acc + Shape::try_from(mine).unwrap() as u16
+                    + match (mine, theirs) {
+                        _ if Shape::try_from(mine).unwrap().wins_against()
+                            == Shape::try_from(theirs).unwrap() =>
+                        {
+                            RoundScore::Win as u16
+                        }
+                        _ if Shape::try_from(mine).unwrap().loses_to()
+                            == Shape::try_from(theirs).unwrap() =>
+                        {
+                            RoundScore::Lose as u16
+                        }
+                        _ => RoundScore::Draw as u16,
+                    }
+            }
             None => acc,
         });
 
@@ -81,14 +90,15 @@ pub fn answer() {
 
     let total2 = rounds
         .clone()
-        .fold(0, |acc, line| match line.split_once(" ") {
-            Some((theirs, intention)) => acc
-                + RoundScore::try_from(intention).unwrap() as u16
-                + match RoundScore::try_from(intention).unwrap() {
-                    RoundScore::Lose => Shape::try_from(theirs).unwrap().wins_against() as u16,
-                    RoundScore::Draw => Shape::try_from(theirs).unwrap() as u16,
-                    RoundScore::Win => Shape::try_from(theirs).unwrap().loses_to() as u16,
-                },
+        .fold(0, |acc, line| match line.split_once(' ') {
+            Some((theirs, intention)) => {
+                acc + RoundScore::try_from(intention).unwrap() as u16
+                    + match RoundScore::try_from(intention).unwrap() {
+                        RoundScore::Lose => Shape::try_from(theirs).unwrap().wins_against() as u16,
+                        RoundScore::Draw => Shape::try_from(theirs).unwrap() as u16,
+                        RoundScore::Win => Shape::try_from(theirs).unwrap().loses_to() as u16,
+                    }
+            }
             None => acc,
         });
 

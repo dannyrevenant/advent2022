@@ -1,9 +1,9 @@
-fn get_map(contents: &str) -> Vec<Vec<u32>> {
+fn get_map(contents: &str) -> Vec<Vec<u8>> {
     contents
         .lines()
         .map(|line| {
             line.chars()
-                .map(|char| char.to_digit(10).unwrap())
+                .map(|char| char.to_digit(10).unwrap() as u8)
                 .collect()
         })
         .collect()
@@ -50,7 +50,7 @@ fn get_results(contents: &str) -> Result<(usize, usize), Box<dyn std::error::Err
                         return true;
                     }
 
-                    return false;
+                    false
                 })
                 .count()
         })
@@ -99,7 +99,7 @@ fn get_results(contents: &str) -> Result<(usize, usize), Box<dyn std::error::Err
                         .take_while(|line_to_parse| line_to_parse[char_pos] < *char)
                         .count();
 
-                    return left * right * up * (down + 1);
+                    left * right * up * (down + 1)
                 })
                 .max()
                 .unwrap();
