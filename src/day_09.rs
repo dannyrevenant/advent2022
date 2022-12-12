@@ -1,6 +1,6 @@
 use std::{collections::HashSet, convert::TryFrom};
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 enum Direction {
     Left,
     Right,
@@ -34,7 +34,7 @@ struct Point {
     previous_positions: HashSet<(i16, i16)>,
 }
 
-fn update_head<'a>(mut head: &'a mut Point, direction: &Direction) {
+fn update_head(mut head: &mut Point, direction: Direction) {
     match direction {
         Direction::Left => {
             head.x -= 1;
@@ -51,30 +51,11 @@ fn update_head<'a>(mut head: &'a mut Point, direction: &Direction) {
     }
 }
 
-fn update_tail<'a>(head: &'a Point, mut tail: &'a mut Point, direction: &Direction) {
-    let x_range = head.x - 1..=head.x + 1;
-    let y_range = head.y - 1..=head.y + 1;
-
-    if !x_range
-        .flat_map(|x| y_range.clone().map(move |y| (x, y)))
-        .any(|tuple| tuple == (tail.x, tail.y))
-    {
-        tail.x = head.x;
-        tail.y = head.y;
-        match direction {
-            Direction::Left => {
-                tail.x += 1;
-            }
-            Direction::Right => {
-                tail.x -= 1;
-            }
-            Direction::Up => {
-                tail.y -= 1;
-            }
-            Direction::Down => {
-                tail.y += 1;
-            }
-        }
+fn update_tail(head: Point, mut tail: &mut Point) {
+    let (delta_x, delta_y) = (head.x - tail.x, head.y - tail.y);
+    if delta_x.abs() == 2 || delta_y.abs() == 2 {
+        tail.x += delta_x.signum();
+        tail.y += delta_y.signum();
     }
 
     tail.previous_positions.insert((tail.x, tail.y));
@@ -90,18 +71,13 @@ fn get_results(contents: &str, length: u8) -> Result<usize, Box<dyn std::error::
     contents
         .lines()
         .filter_map(|line| line.split_once(' '))
-        .map(|(left, right)| {
-            (
-                Direction::try_from(left).unwrap(),
-                right.parse::<i16>().unwrap(),
-            )
+        .flat_map(|(left, right)| {
+            vec![Direction::try_from(left).unwrap(); right.parse::<usize>().unwrap()]
         })
-        .for_each(|(direction, amount)| {
-            for _ in 1..=amount {
-                update_head(&mut rope.knots[0], &direction);
-                for i in 1..rope.knots.len() {
-                    update_tail(&rope.knots[i - 1].clone(), &mut rope.knots[i], &direction);
-                }
+        .for_each(|direction| {
+            update_head(&mut rope.knots[0], direction);
+            for i in 1..rope.knots.len() {
+                update_tail(rope.knots[i - 1].clone(), &mut rope.knots[i]);
             }
         });
 
@@ -138,14 +114,14 @@ R 2";
 #[test]
 fn test_answer_2() {
     // let input = include_str!("../input/day_08.txt");
-    let input = "R 4
-U 4
-L 3
-D 1
-R 4
-D 1
-L 5
-R 2";
+    let input = "R 5
+U 8
+L 8
+D 3
+R 17
+D 10
+L 25
+U 20";
 
     let expected_output = 36;
 
